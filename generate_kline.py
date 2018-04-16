@@ -16,7 +16,6 @@ for index, row in df.iterrows():
         xminBar.high = row['high']
         xminBar.low = row['low']
         xminBar.close = row['close']
-                # 累加老K线
     else:
         xminBar.high = max(xminBar.high, row['high'])
         xminBar.low = min(xminBar.low, row['low'])
@@ -33,4 +32,4 @@ for index, row in df.iterrows():
         df_new = df_new.append(row)
         xminBar = None
 
-df_new.to_csv("./data/XBTUSD_3min.csv")
+df_new.reset_index().to_csv("./data/XBTUSD_3min.csv")
