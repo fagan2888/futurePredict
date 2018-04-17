@@ -8,9 +8,8 @@ from sklearn import linear_model, datasets
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import confusion_matrix
 from sklearn.linear_model import LogisticRegression
-from xgboost import XGBClassifier
 
-df = pd.read_csv("./data/train_M10.csv")
+df = pd.read_csv("./data/train_M5.csv")
 df = df.dropna()
 
 total_length = len(df.index)
