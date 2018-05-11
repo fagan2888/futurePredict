@@ -33,7 +33,6 @@ MAX_TRIGING_LEG = 10
 MAX_SPREAD = 2
 WIN_TICK = 55
 
-
 def direction(s):
     dir = 0
     for i in range(len(s) - 1):
@@ -52,10 +51,12 @@ def trend(s):
 
 for i in range(M, len(askPrice)):
 
-    open_flag =  abs(closePrice[i] - closePrice[i-1]) < MAX_TRIGING_LEG and spreadPrice[i] < MAX_SPREAD and closePrice[i-1] - closePrice[i-2] > 0 and 1.0 * (closePrice[i] - closePrice[i-1]) / (closePrice[i-1] - closePrice[i-2]) > 1 and np.std(closePrice[i-M:i-1]) < 4 \
+    open_flag =  abs(closePrice[i] - closePrice[i-1]) < MAX_TRIGING_LEG and spreadPrice[i] < MAX_SPREAD and closePrice[i-1] - closePrice[i-2] > 0 and 1.0 * (closePrice[i] - closePrice[i-1]) / (closePrice[i-1] - closePrice[i-2]) > 0 and np.std(closePrice[i-M:i-2]) < 5 \
             and (1.0 * (closePrice[i] - np.max(closePrice[i-M:i]))/ np.max(closePrice[i-M:i]) > TRIG_PERCENT
                  and 1.0* (closePrice[i] - np.min(closePrice[i-M:i]))/ np.min(closePrice[i-M:i]) > UP_TREND
                  and 1.0* (closePrice[i-1] - np.min(closePrice[i-M:i-1]))/ np.min(closePrice[i-M:i-1]) < UP_TREND)
+
+
 
     # open_flag =  abs(closePrice[i] - closePrice[i-1]) < MAX_TRIGING_LEG and spreadPrice[i] < 2 and np.std(closePrice[i-M:i-1]) < 4 \
     #         and (1.0 * (closePrice[i] - np.max(closePrice[i-M:i]))/ np.max(closePrice[i-M:i]) > TRIG_PERCENT
@@ -63,7 +64,7 @@ for i in range(M, len(askPrice)):
     #              and 1.0* (closePrice[i-1] - np.min(closePrice[i-M:i-1]))/ np.min(closePrice[i-M:i-1]) < UP_TREND)
 
 
-    short_flag = abs(closePrice[i] - closePrice[i-1]) < MAX_TRIGING_LEG and spreadPrice[i] < MAX_SPREAD and closePrice[i-1] - closePrice[i-2] < 0 and 1.0 * (closePrice[i] - closePrice[i-1]) / (closePrice[i-1] - closePrice[i-2]) > 1 and np.std(closePrice[i-M:i-1]) < 4 \
+    short_flag = abs(closePrice[i] - closePrice[i-1]) < MAX_TRIGING_LEG and spreadPrice[i] < MAX_SPREAD and closePrice[i-1] - closePrice[i-2] < 0 and 1.0 * (closePrice[i] - closePrice[i-1]) / (closePrice[i-1] - closePrice[i-2]) > 1 and np.std(closePrice[i-M:i-2]) < 4.5 \
             and (1.0 * (closePrice[i] - np.min(closePrice[i-M:i])) /  np.min(closePrice[i-M:i]) < -TRIG_PERCENT and
                  1.0 * (closePrice[i] - np.max(closePrice[i-M:i])) /  np.max(closePrice[i-M:i]) < -UP_TREND  and
                  1.0 * (closePrice[i-1] - np.max(closePrice[i-M:i-1]))/ np.max(closePrice[i-M:i-1]) > -UP_TREND)
@@ -76,7 +77,7 @@ for i in range(M, len(askPrice)):
 
     if open_flag :
         for l in range(i, len(closePrice)):
-            if closePrice[l] - closePrice[i] > WIN_TICK:
+            if closePrice[l] - closePrice[i] > WIN_TICK :
                 win_count += 1
                 print 'win'
                 print i, l

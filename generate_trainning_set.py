@@ -5,10 +5,10 @@ import numpy as np
 from utils.array_manager import ArrayManager
 from utils.array_manager import VtBarData
 
-win_percent = 0.005
+win_percent = 0.01
 
 N = 20
-M = 5
+M = 200
 
 
 def preprocess():
@@ -121,6 +121,6 @@ def preprocess():
     return df
 
 df = preprocess()
-df.reset_index().to_csv("./data/train_M5.csv")
+df.reset_index().to_csv("./data/train_M200.csv")
 
 
