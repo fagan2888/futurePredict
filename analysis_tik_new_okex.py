@@ -6,6 +6,8 @@ import numpy as np
 import matplotlib.mlab as mlab
 import matplotlib.pyplot as plt
 from scipy.stats import skew
+import matplotlib
+
 
 df = pd.read_csv("./data/okex.csv")
 
@@ -18,12 +20,15 @@ print bidPrice[0:10]
 closePrice = (askPrice + bidPrice) / 2
 spreadPrice = askPrice - bidPrice
 
+x = range(0, len(closePrice))
+y = closePrice
 
 close_dir = askPrice[1:] - askPrice[:-1]
 
 win_count = 0
 loss_count = 0
 
+N = 400
 M = 200
 TRIG_PERCENT = -1
 UP_TREND = 0.002
@@ -48,7 +53,7 @@ def trend(s):
         S += abs(s[i+1] - s[i-1])
     return 1.0 * A / S
 
-i = M
+i = N
 count = 0
 wait_signal = False
 open_flag = False
@@ -57,6 +62,8 @@ WAIT_TIME = 400
 last_open_win = False
 last_short_win = False
 
+short_lose = []
+short_win = []
 
 while i < len(askPrice):
 
@@ -67,7 +74,7 @@ while i < len(askPrice):
     open_flag = False
 
     open_flag =  abs(spreadPrice[i]) < MAX_SPREAD \
-                 and np.std(closePrice[i-M:i-1]) < 5 and np.std(closePrice[i-M:i-1]) > 0 \
+                 and np.std(closePrice[i-N:i-1]) < 5 and np.std(closePrice[i-M:i-1]) > 0 \
                  and (1.0 * (closePrice[i] - np.max(closePrice[i-M:i]))/ np.max(closePrice[i-M:i]) > 0
                  and 1.0 * (closePrice[i-1] - np.max(closePrice[i-M:i-1]))/ np.max(closePrice[i-M:i-1]) < 0
                  and 1.0* (closePrice[i] - np.min(closePrice[i-M:i]))/ np.min(closePrice[i-M:i]) > UP_TREND)
@@ -84,7 +91,7 @@ while i < len(askPrice):
 
 
     short_flag = abs(spreadPrice[i]) < MAX_SPREAD \
-                 and np.std(closePrice[i-M:i-1]) < 5  and np.std(closePrice[i-M:i-1]) > 0 \
+                 and np.std(closePrice[i-N:i-1]) < 5  and np.std(closePrice[i-M:i-1]) > 0 \
             and (closePrice[i] - np.min(closePrice[i-M:i]) < 0 and
                  closePrice[i-1] - np.min(closePrice[i - M:i-1]) > 0 and
                  1.0 * (closePrice[i] - np.max(closePrice[i-M:i])) /  np.max(closePrice[i-M:i]) < -DOWN_TREND)
@@ -133,6 +140,7 @@ while i < len(askPrice):
 
             if 1.0*(closePrice[l] - closePrice[i]) / closePrice[i] > WIN_PERCENT:
                 if last_short_win:
+                    short_lose.append(i)
                     loss_count += 1
                 last_short_win = True
                 print 'short loss'
@@ -143,6 +151,7 @@ while i < len(askPrice):
 
             if 1.0*(closePrice[l] - closePrice[i]) / closePrice[i] < - WIN_PERCENT:
                 if last_short_win:
+                    short_win.append(i)
                     win_count += 1
                 last_short_win = True
                 print 'short win'
@@ -157,3 +166,8 @@ while i < len(askPrice):
 
 print 1.0 * win_count / (win_count + loss_count)
 print win_count, loss_count
+
+plt.plot(x, y, color='blue')
+plt.scatter(short_win, [y[i] for i in short_win], marker='+', c='r',s = 100)
+plt.scatter(short_lose, [y[i] for i in short_lose], marker='*', c='green',s = 100)
+plt.show()

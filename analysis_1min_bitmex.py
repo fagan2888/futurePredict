@@ -17,6 +17,10 @@ close = df['close'].values
 dates = df['timestamp'].values
 volume = df['volume']
 
+x = range(0, len(close))
+y = close
+
+
 #paramater
 M = 100
 WIN_PERCENT = 0.01
@@ -24,6 +28,9 @@ TRIG_PERCENT = 0.4
 
 win_count = 0
 loss_count = 0
+
+long_win = []
+long_loss = []
 
 # ----------------------------------------------------------------------
 def boll(close, n, dev, array=False):
@@ -48,6 +55,7 @@ while i < len(close):
         for l in range(i, len(close)):
             if 1.0 * (close[l] - close[i]) / close[i] > WIN_PERCENT:
                 win_count += 1
+                long_win.append(i)
                 print 'win'
                 print i, l
                 print close[i - 1], close[i], close[l], dates[i], dates[l]
@@ -56,6 +64,7 @@ while i < len(close):
 
             if 1.0 * (close[l] - close[i]) / close[i] < -WIN_PERCENT:
                 loss_count += 1
+                long_loss.append(i)
                 print 'loss'
                 print i, l
                 print close[i - 1], close[i], close[l], dates[i], dates[l]
@@ -85,5 +94,8 @@ while i < len(close):
 print 1.0 * win_count / (win_count + loss_count)
 print win_count, loss_count
 
-
+plt.plot(x, y, color='blue')
+plt.scatter(long_win, [y[i] for i in long_win], marker='+', c='r',s = 100)
+plt.scatter(long_loss, [y[i] for i in long_loss], marker='*', c='green',s = 100)
+plt.show()
 
