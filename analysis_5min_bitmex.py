@@ -87,9 +87,10 @@ while i < len(close):
 
 
 
-    open_flag = (close[i] - close[i-1] > 0 and close[i] - fast[-1] > 0 and close[i] - slow[-1] > TRIG_PERCENT and abs(long_count) < MACD_K and volume[i] > volume[i-1])
+    open_flag = (close[i] - close[i-1] > 0 and close[i] - fast[-1] > 0 and close[i] - slow[-1] > TRIG_PERCENT and abs(long_count) < MACD_K
+                 and volume[i] > volume[i-1]) and close[i] - open[i] > close[i-1] - open[i-1]
     short_flag =(close[i] - fast[-1] < 0 and close[i] - slow[-1] < -TRIG_PERCENT and abs(short_count) < MACD_K and volume[i] > volume[i-1])
-
+    short_flag = False
     #open_flag = False
 
     if open_flag:
@@ -104,7 +105,7 @@ while i < len(close):
 
 
         for l in range(i, len(close)):
-            if close[l] - close[i] > 2 * WIN_TICK:
+            if close[l] - close[i] > WIN_TICK:
                 win_count += 1
                 long_win.append(i)
                 print 'win'

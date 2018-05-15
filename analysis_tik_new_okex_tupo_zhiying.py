@@ -31,16 +31,15 @@ close_dir = askPrice[1:] - askPrice[:-1]
 win_count = 0
 loss_count = 0
 
-N = 100
-M = 2000
+N = 600
+M = 1000
+MIN_T = 2000
+
 TRIG_PERCENT = -1
-UP = 0.005
-UP_TREND = 0.001
+UP_TREND = 0.004
 DOWN_TREND = 0.002
 MAX_SPREAD = 3
 MAX_TRIGING_LEG = 5
-
-
 
 def direction(s):
     dir = 0
@@ -72,10 +71,11 @@ short_win = []
 open_win = []
 open_loss = []
 
-for i in range(M, len(closePrice)- 100):
+i = M
+while i < len(closePrice)- 100:
 
-    WIN_PERCENT = 0.005
-    LOS_PERCENT = 0.002
+    WIN_PERCENT = 0.012
+    LOS_PERCENT = 0.006
 
     count += 1
     open_flag = False
@@ -93,18 +93,40 @@ for i in range(M, len(closePrice)- 100):
     #A1, B1 = optimize.curve_fit(f_1, range(0, M-N), closePrice[i-M:i-N])[0]
     #print A1
 
-    max_index = np.argmax(closePrice[i-M:i])
-    min_index = np.argmin(closePrice[i-M:i])
+    max_index = np.argmax(closePrice[i-M:i-N])
+    min_index = np.argmin(closePrice[i-M:i-N])
     max_value = closePrice[i-M+max_index]
     min_value = closePrice[i-M+min_index]
 
+    # if min_index > 0:
+    #     first_max_value = np.max(closePrice[i-M: i-M+min_index])
+    # else:
+    #     first_max_value = min_value
 
-    open_flag =  closePrice[i] - closePrice[i-1] > 0 and abs(spreadPrice[i-1]) < MAX_SPREAD and abs(closePrice[i-1] - closePrice[i-2]) < 5 \
-                 and min_index - max_index > 500 \
-                 and (max_value - min_value) / min_value > UP \
-                 and (closePrice[i-1] - min_value) / min_value > UP_TREND \
-                 and (closePrice[i-2] - min_value) / min_value < UP_TREND \
-                 and M - min_index < N
+
+
+    # open_flag = abs(spreadPrice[i-1]) < MAX_SPREAD and abs(closePrice[i-1] - closePrice[i-2]) < 5 \
+    #             and closePrice[i] - closePrice[i-1] > 0 \
+    #             and (closePrice[i - 2] - np.min(closePrice[i-N:i-2])) / np.min(closePrice[i-N:i-2]) > UP_TREND \
+    #             and closePrice[i] - np.max(closePrice[i-M:i]) > 0 and closePrice[i-1] - np.max(closePrice[i-M:i-1]) < 0
+
+
+
+    open_flag = abs(spreadPrice[i-1]) < MAX_SPREAD and abs(closePrice[i-1] - closePrice[i-2]) < 5 \
+                and closePrice[i] - closePrice[i-1] > 0 \
+                and (closePrice[i - 2] - np.min(closePrice[i-N:i-2])) / np.min(closePrice[i-N:i-2]) < UP_TREND \
+                and (closePrice[i - 1] - np.min(closePrice[i-N:i-2])) / np.min(closePrice[i-N:i-2]) > UP_TREND \
+                # and np.std(closePrice[i-M:i-N]) < 5
+
+
+
+
+            # open_flag =  closePrice[i] - closePrice[i-1] > 0 and abs(spreadPrice[i-1]) < MAX_SPREAD and abs(closePrice[i-1] - closePrice[i-2]) < 5 \
+    #              and min_index - max_index > 500 \
+    #              and (max_value - min_value) / min_value > UP \
+    #              and (closePrice[i-1] - min_value) / min_value > UP_TREND \
+    #              and (closePrice[i-2] - min_value) / min_value < UP_TREND \
+    #              and M - min_index < N
 
         #wait 5 miao
 
@@ -137,12 +159,15 @@ for i in range(M, len(closePrice)- 100):
         for l in range(i, len(closePrice)):
 
             #如果刚开始就盈利那么正常止损止盈
-
-
             # #如果刚开始亏，减少止损阈值
             # if l - i > WAIT_TIME:
             #     if np.mean(closePrice[i:l]) < closePrice[i]:
             #         LOS_PERCENT = 0.003
+            # if l - i > MIN_T:
+            #     WIN_PERCENT = 0.005
+            #     LOS_PERCENT = 0.005
+
+
 
             if 1.0 * (closePrice[l] - closePrice[i]) / closePrice[i] >  WIN_PERCENT:
                 if last_open_win:
@@ -152,8 +177,8 @@ for i in range(M, len(closePrice)- 100):
                 last_open_win = True
                 print 'open win'
                 print i, l
-                print closePrice[i-1], closePrice[i], closePrice[l], dates[i], dates[l]
                 i = l + 1
+                print closePrice[i-1], closePrice[i], closePrice[l], dates[i], dates[l]
                 break
 
             if 1.0 * (closePrice[l] - closePrice[i]) / closePrice[i] < -LOS_PERCENT:
@@ -164,8 +189,10 @@ for i in range(M, len(closePrice)- 100):
                 last_open_win = True
                 print 'open loss'
                 print i, l
+                i = l + 1
                 print closePrice[i-1], closePrice[i], closePrice[l], dates[i], dates[l]
                 break
+        i += 1
 
     elif short_flag:
         for l in range(i, len(closePrice)):
@@ -189,6 +216,9 @@ for i in range(M, len(closePrice)- 100):
                 print i, l
                 print closePrice[i-1], closePrice[i], closePrice[l], dates[i], dates[l]
                 break
+        i += 1
+    else:
+        i += 1
 
 print 1.0 * win_count / (win_count + loss_count)
 print win_count, loss_count
