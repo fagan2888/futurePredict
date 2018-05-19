@@ -12,7 +12,7 @@ from scipy import optimize
 def f_1(x, A, B):
     return A*x + B
 
-df = pd.read_csv("./data/okex.csv")
+df = pd.read_csv("./data/bitmex_future.csv")
 
 askPrice = df['askPrice1'].values
 bidPrice = df['bidPrice1'].values
@@ -73,8 +73,8 @@ open_loss = []
 i = M
 while i < len(closePrice)- 100:
 
-    WIN_PERCENT = 0.01
-    LOS_PERCENT = 0.005
+    WIN_PERCENT = 0.003
+    LOS_PERCENT = 0.003
 
     count += 1
     open_flag = False
